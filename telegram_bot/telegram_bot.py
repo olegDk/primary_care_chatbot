@@ -3,14 +3,15 @@ import logging
 
 import emoji
 from telegram import ReplyKeyboardMarkup, Update, ReplyKeyboardRemove
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, ConversationHandler, CallbackContext
-
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, \
+    ConversationHandler, CallbackContext
 
 from dialogue_system.dialogue_system import DialogueSystem
 
 # Setting logger config
 logging.basicConfig(
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    level=logging.INFO
 )
 logger = logging.getLogger(__name__)
 
@@ -21,7 +22,6 @@ emoji_noting = emoji.emojize(":clipboard:")
 
 class TelegramBot:
     def __init__(self):
-
         # State of chatbot client either INIT or QUESTIONING or DONE
         self.__current_state = None
 
@@ -37,10 +37,13 @@ class TelegramBot:
         self.__dialogue_system = DialogueSystem()
 
         # All possible conversation states which are known to chatbot client
-        self.__conversation_states = self.__dialogue_system.get_conversation_states_dict
+        self.__conversation_states = \
+            self.__dialogue_system.get_conversation_states
 
         # Change to comprehension from diseases list
-        self.__reply_keyboard = [[disease] for disease in self.__dialogue_system.get_diseases_list]
+        self.__reply_keyboard = [
+            [disease] for disease in self.__dialogue_system.get_diseases_list
+        ]
 
         self.__yes_no_keyboard = [
             ["Так"],
@@ -51,33 +54,40 @@ class TelegramBot:
             ["Завершити"]
         ]
         self.__markup = ReplyKeyboardMarkup(self.__reply_keyboard)
-        self.__yes_no_markup = ReplyKeyboardMarkup(self.__yes_no_keyboard, resize_keyboard=True)
-        self.__done_markup = ReplyKeyboardMarkup(self.__done_keyboard, resize_keyboard=True)
+        self.__yes_no_markup = \
+            ReplyKeyboardMarkup(self.__yes_no_keyboard, resize_keyboard=True)
+        self.__done_markup = \
+            ReplyKeyboardMarkup(self.__done_keyboard, resize_keyboard=True)
 
     def start(self, update: Update, _: CallbackContext) -> int:
         update.message.reply_text(
             f"{emoji_doctor}"
         )
         update.message.reply_text(
-            f"Доброго дня! Що вас турбує?",
+            "Доброго дня! Що вас турбує?",
             reply_markup=self.__markup,
         )
-        self.__current_state = self.__conversation_states["INIT"]
+        self.__current_state = self.__conversation_states.INIT.value
 
         return self.__current_state
 
-    def initialize_dialogue(self, update: Update, context: CallbackContext) -> int:
+    def initialize_dialogue(self, update: Update,
+                            context: CallbackContext) -> int:
         text = update.message.text
         context.user_data['choice'] = text
         # TODO Handle errors
         self.__selected_disease = text
+        print(self.__selected_disease)
         reply = self.__dialogue_system.respond(disease=self.__selected_disease,
-                                               message=(self.__current_state, text))
-        self.__current_state = self.__conversation_states['QUESTIONING']
+                                               message=(self.__current_state,
+                                                        text))
+        self.__current_state = self.__conversation_states.QUESTIONING.value
         self.__questioning_state = reply[0]
-        update.message.reply_text(f"{emoji_doctor}Обрана проблема: {text.lower()}"
-                                  f"\n\n{emoji_noting}Будь ласка, дай відповідь"
-                                  f" на декілька запитань щоб уточнити проблему")
+        update.message.reply_text(f"{emoji_doctor}Обрана проблема: "
+                                  f"{text.lower()}"
+                                  f"\n\n{emoji_noting}Будь ласка, "
+                                  "дай відповідь на декілька "
+                                  "запитань щоб уточнити проблему")
         update.message.reply_text(f"{emoji_doctor}{reply[1]}",
                                   reply_markup=self.__yes_no_markup)
 
@@ -87,12 +97,13 @@ class TelegramBot:
         text = update.message.text
         context.user_data['choice'] = text
 
-        reply = self.__dialogue_system.respond(disease=self.__selected_disease,
-                                               message=(self.__questioning_state, text))
+        reply = self.__dialogue_system. \
+            respond(disease=self.__selected_disease,
+                    message=(self.__questioning_state, text))
 
         self.__questioning_state = reply[0]
 
-        if self.__questioning_state == self.__conversation_states["DONE"]:
+        if self.__questioning_state == self.__conversation_states.DONE.value:
             self.__current_state = self.__questioning_state
             update.message.reply_text(f"{emoji_doctor}{reply[1]}",
                                       reply_markup=self.__done_markup)
@@ -107,7 +118,8 @@ class TelegramBot:
         user_data = context.user_data
 
         update.message.reply_text(
-            f"{emoji_doctor}Будьте здорові! Для початку діалогу, натисніть будь ласка /start",
+            f"{emoji_doctor}Будьте здорові! "
+            "Для початку діалогу, натисніть будь ласка /start",
             reply_markup=ReplyKeyboardRemove(),
         )
 
@@ -123,18 +135,25 @@ class TelegramBot:
         # Get the dispatcher to register handlers
         dispatcher = updater.dispatcher
 
-        diseases_regex = f"^({'|'.join([disease for disease in self.__dialogue_system.get_diseases_list])})$"
+        joined_diseases_list = \
+            '|'.join(
+                disease for disease in self.__dialogue_system.get_diseases_list
+            )
 
-        # Add conversation handler with the states INPUTTING_PROBLEM, TYPING_CHOICE and TYPING_REPLY
+        diseases_regex = \
+            f"^({joined_diseases_list})$"
+
+        # Add conversation handler with the states INPUTTING_PROBLEM,
+        # TYPING_CHOICE and TYPING_REPLY
         conv_handler = ConversationHandler(
             entry_points=[CommandHandler("start", self.start)],
             states={
-                self.__conversation_states["INIT"]: [
+                self.__conversation_states.INIT.value: [
                     MessageHandler(
                         Filters.regex(diseases_regex), self.initialize_dialogue
                     ),
                 ],
-                self.__conversation_states["QUESTIONING"]: [
+                self.__conversation_states.QUESTIONING.value: [
                     MessageHandler(
                         Filters.regex("^(Так|Ні)$"), self.regular_choice
                     ),
