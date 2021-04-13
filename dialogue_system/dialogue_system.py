@@ -1,21 +1,28 @@
-from typing import Tuple, Type
+from typing import Tuple
 from dialogue_system.diseases.constants import diseases_list,\
-    ConversationStates, transitions_dict
+    transitions_dict, DONE, INIT, QUESTIONING
 
 
 class DialogueSystem:
     def __init__(self):
         self.__diseases_list = diseases_list
         self.__transitions_dict = transitions_dict
-        self.__conversation_states = ConversationStates
 
     @property
     def get_diseases_list(self) -> list:
         return self.__diseases_list
 
     @property
-    def get_conversation_states(self) -> Type[ConversationStates]:
-        return self.__conversation_states
+    def done(self) -> int:
+        return DONE
+
+    @property
+    def init(self) -> int:
+        return INIT
+
+    @property
+    def questioning(self) -> int:
+        return QUESTIONING
 
     @property
     def get_transitions_dict(self) -> dict:

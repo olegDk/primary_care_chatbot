@@ -1,4 +1,3 @@
-from enum import Enum
 import emoji
 
 red_circle_sign = emoji.emojize(":red_circle:")
@@ -29,29 +28,24 @@ diseases_list = ["Алергія", "Біль у горлі", "Кашель", "Д
 
 
 # Define done, initial and questioning state
-class ConversationStates(Enum):
-    DONE = 0
-    INIT = 1
-    QUESTIONING = 2
+DONE, INIT, QUESTIONING = range(3)
 
 
 # Allergy states
-class AllergyStates(Enum):
-    ALLERGY_SYMPTOMS = 3
-    ALLERGY_ALLERGENES_CONTACT = 4
+ALLERGY_SYMPTOMS, ALLERGY_ALLERGENES_CONTACT = range(3, 5)
 
 
 allergy_dict = {
-    (ConversationStates.INIT.value, "Алергія"): (
-        AllergyStates.ALLERGY_SYMPTOMS.value,
+    (INIT, "Алергія"): (
+        ALLERGY_SYMPTOMS,
         "Чи наявні один або декілька симптомів алергії:\n\n"
         "{red_circle_sign}чхання,\n"
         f"{red_circle_sign}свербіж і почервоніння очей,\n"
         f"{red_circle_sign}водянисті виділення з носа,\n"
         f"{red_circle_sign}шкірні висипи,\n"
         f"{red_circle_sign}шкірний свербіж"),
-    (AllergyStates.ALLERGY_SYMPTOMS.value, "Так"): (
-        AllergyStates.ALLERGY_ALLERGENES_CONTACT.value,
+    (ALLERGY_SYMPTOMS, "Так"): (
+        ALLERGY_ALLERGENES_CONTACT,
         "Чи наявний зв'язок симптомів із можливим контактом "
         "з алергенами:\n\n"
         f"{red_circle_sign}домашні тварини, сухий корм для риб,\n"
@@ -61,11 +55,11 @@ allergy_dict = {
         f"{red_circle_sign}уживання деяких продуктів харчування,\n"
         f"{red_circle_sign}укуси комах,\n"
         f"{red_circle_sign}сонячне опромінення, холод"),
-    (AllergyStates.ALLERGY_SYMPTOMS.value, "Ні"): (
-        ConversationStates.DONE.value,
+    (ALLERGY_SYMPTOMS, "Ні"): (
+        DONE,
         "Необхідно звернутися до лікаря для уточнення діагнозу"),
-    (AllergyStates.ALLERGY_ALLERGENES_CONTACT.value, "Так"): (
-        ConversationStates.DONE.value,
+    (ALLERGY_ALLERGENES_CONTACT, "Так"): (
+        DONE,
         "Необхідно звернутися до лікаря "
         "для уточнення діагнозу\n\n"
         "Для полегшення симптомів алергії:\n"
@@ -78,8 +72,8 @@ allergy_dict = {
         f"{checkmark_sign}робити вологе прибирання,\n"
         f"{checkmark_sign}застосовувати гіпоалергенну,"
         " елімінаційну дієту"),
-    (AllergyStates.ALLERGY_ALLERGENES_CONTACT.value, "Ні"): (
-        ConversationStates.DONE.value,
+    (ALLERGY_ALLERGENES_CONTACT, "Ні"): (
+        DONE,
         "Необхідно звернутися до лікаря "
         "для уточнення діагнозу\n\n"
         "Для тимчасового полегшення симптомів "
@@ -94,22 +88,19 @@ transitions_dict['Алергія'] = allergy_dict
 
 
 # Sore throat states
-class SoreThroatStates(Enum):
-    SORE_THROAT_PRESSURE = 5
-    SORE_THROAT_REASON = 6
-    SORE_THROAT_SYMPTOMS = 7
-    SORE_THROAT_DIABETES = 8
+SORE_THROAT_PRESSURE, SORE_THROAT_REASON,\
+    SORE_THROAT_SYMPTOMS, SORE_THROAT_DIABETES = range(5, 9)
 
 
 sore_throat_dict = {
-    (ConversationStates.INIT.value, "Біль у горлі"):
-        (SoreThroatStates.SORE_THROAT_PRESSURE.value,
+    (INIT, "Біль у горлі"):
+        (SORE_THROAT_PRESSURE,
          "Біль у горлі виник після надмірного тривалого "
          "навантаження на голосові зв'язки або тривалого "
          "перебування у прокуреному приміщенні, "
          "вдиханні хімічних речовин?"),
-    (SoreThroatStates.SORE_THROAT_PRESSURE.value, "Ні"):
-        (SoreThroatStates.SORE_THROAT_REASON.value,
+    (SORE_THROAT_PRESSURE, "Ні"):
+        (SORE_THROAT_REASON,
          "Біль у горлі виник:\n\n"
          f"{red_circle_sign}після переохолодження (та/або "
          "контакту з хворим на ГРВІ) і супроводжується "
@@ -117,13 +108,13 @@ sore_throat_dict = {
          "лихоманка, і т.д.),\n"
          f"{red_circle_sign}під час вдихання холодного повітря,\n"
          f"{red_circle_sign}через хронічний тонзиліт"),
-    (SoreThroatStates.SORE_THROAT_PRESSURE.value, "Так"):
-        (ConversationStates.DONE.value,
+    (SORE_THROAT_PRESSURE, "Так"):
+        (DONE,
          "Для полегшення стану можна "
          "рекомендувати препарат, який містить "
          "місцевий анестетик"),
-    (SoreThroatStates.SORE_THROAT_REASON.value, "Так"):
-        (SoreThroatStates.SORE_THROAT_SYMPTOMS.value,
+    (SORE_THROAT_REASON, "Так"):
+        (SORE_THROAT_SYMPTOMS,
          "Чи є у вас скарги на:\n\n"
          f"{red_circle_sign}відчуття болю під час ковтання,\n"
          f"{red_circle_sign}осиплість,\n"
@@ -138,26 +129,26 @@ sore_throat_dict = {
          f"{red_circle_sign}лихоманку (вище 39 градусів), "
          "різку загальну слабкість, нездужання, блювання,\n"
          f"{red_circle_sign}ви вагітні (жінкам)?"),
-    (SoreThroatStates.SORE_THROAT_REASON.value, "Ні"):
-        (ConversationStates.DONE.value,
+    (SORE_THROAT_REASON, "Ні"):
+        (DONE,
          "Необхідно звернутися до лікаря "
          "для уточнення діагнозу"),
-    (SoreThroatStates.SORE_THROAT_SYMPTOMS.value, "Так"):
-        (ConversationStates.DONE.value,
+    (SORE_THROAT_SYMPTOMS, "Так"):
+        (DONE,
          "Необхідно звернутися до лікаря "
          "для уточнення діагнозу"),
-    (SoreThroatStates.SORE_THROAT_SYMPTOMS.value, "Ні"):
-        (SoreThroatStates.SORE_THROAT_DIABETES.value,
+    (SORE_THROAT_SYMPTOMS, "Ні"):
+        (SORE_THROAT_DIABETES,
          "Чи хворієте ви на цукровий діабет?"),
-    (SoreThroatStates.SORE_THROAT_DIABETES.value, "Ні"):
-        (ConversationStates.DONE.value,
+    (SORE_THROAT_DIABETES, "Ні"):
+        (DONE,
          "Вам можна рекомендувати препарати для симптоматичного "
          "лікування болю в горлі (таблетки, льодяники для "
          "розсмоктуваання, аерозолі, спреї, розчини та ін.). "
          "Сучасні комплексні препарати на основі "
          "фітонірингових технологій"),
-    (SoreThroatStates.SORE_THROAT_DIABETES.value, "Так"):
-        (ConversationStates.DONE.value,
+    (SORE_THROAT_DIABETES, "Так"):
+        (DONE,
          "Вам можна рекомендувати препарати у спеціальних "
          "лікарських формах для розсмоктування для хворих "
          "із цукровим діабетом, таблетки, аерозолі, спреї, "
@@ -168,29 +159,22 @@ transitions_dict['Біль у горлі'] = sore_throat_dict
 
 
 # Cough states
-class CoughStates(Enum):
-    COUGH_LASTING = 9
-    COUGH_DRY = 10
-    COUGH_SMOKING = 11
-    COUGH_SYMPTOMS = 12
-    COUGH_SORE_THROAT = 13
-    COUGH_FLU = 14
-    COUGH_ITCH = 15
-    COUGH_IRRITATION = 16
+COUGH_LASTING, COUGH_DRY, COUGH_SMOKING, COUGH_SYMPTOMS,\
+    COUGH_SORE_THROAT, COUGH_FLU, COUGH_ITCH, COUGH_IRRITATION = range(9, 17)
 
 
 cough_dict = {
-    (ConversationStates.INIT.value, "Кашель"):
-        (CoughStates.COUGH_LASTING.value,
+    (INIT, "Кашель"):
+        (COUGH_LASTING,
          "У вас кашель триває більше 3 днів?"),
-    (CoughStates.COUGH_LASTING.value, "Ні"):
-        (CoughStates.COUGH_DRY.value,
+    (COUGH_LASTING, "Ні"):
+        (COUGH_DRY,
          "У вас кашель сухий?"),
-    (CoughStates.COUGH_LASTING.value, "Так"):
-        (ConversationStates.DONE.value,
+    (COUGH_LASTING, "Так"):
+        (DONE,
          "Необхідно звернутися до лікаря!"),
-    (CoughStates.COUGH_DRY.value, "Ні"):
-        (CoughStates.COUGH_SYMPTOMS.value,
+    (COUGH_DRY, "Ні"):
+        (COUGH_SYMPTOMS,
          "Чи є загрозливі симптоми:\n\n"
          f"{red_circle_sign}інтенсивність кашлю зростає,\n"
          f"{red_circle_sign}висока (вище 38 градусів) температура,\n"
@@ -198,60 +182,151 @@ cough_dict = {
          f"{red_circle_sign}виділення густого зеленуватого мокротиння,\n"
          f"{red_circle_sign}виділення мокротиння з прожилками крові,\n"
          f"{red_circle_sign}утруднення дихання, напади ядухи"),
-    (CoughStates.COUGH_DRY.value, "Так"):
-        (CoughStates.COUGH_SMOKING.value,
+    (COUGH_DRY, "Так"):
+        (COUGH_SMOKING,
          "Чи ви курите?"),
-    (CoughStates.COUGH_SMOKING.value, "Ні"):
-        (CoughStates.COUGH_IRRITATION.value,
+    (COUGH_SMOKING, "Ні"):
+        (COUGH_IRRITATION,
          "Чи мало місце вдихання пилу або подразнюючої "
          "хімічної речовини?"),
-    (CoughStates.COUGH_SMOKING.value, "Так"):
-        (ConversationStates.DONE.value,
+    (COUGH_SMOKING, "Так"):
+        (DONE,
          "Тютюновий дим подразнює дихальні шляхи та призводить "
          "до розвитку багатьох захворювань. Якщо кашель турбує більше "
          "тижня, необхідно звернутися до лікаря!"),
-    (CoughStates.COUGH_IRRITATION.value, "Так"):
-        (ConversationStates.DONE.value,
+    (COUGH_IRRITATION, "Так"):
+        (DONE,
          "Якщо подібний кашель не зникає протягом години, "
          "необхідно звернутися до лікаря!"),
-    (CoughStates.COUGH_IRRITATION.value, "Ні"):
-        (CoughStates.COUGH_FLU.value,
+    (COUGH_IRRITATION, "Ні"):
+        (COUGH_FLU,
          "Ви нещодавно хворіли на ГРВІ?"),
-    (CoughStates.COUGH_SYMPTOMS.value, "Ні"):
-        (CoughStates.COUGH_SORE_THROAT.value,
+    (COUGH_SYMPTOMS, "Ні"):
+        (COUGH_SORE_THROAT,
          "Чи є у вас біль у горлі, свербіння у носі, чхання, "
          "закладеність носа?"),
-    (CoughStates.COUGH_SYMPTOMS.value, "Так"):
-        (ConversationStates.DONE.value,
+    (COUGH_SYMPTOMS, "Так"):
+        (DONE,
          "Необхідно терміново звернутися до лікаря!"),
-    (CoughStates.COUGH_SORE_THROAT.value, "Ні"):
-        (CoughStates.COUGH_FLU.value,
+    (COUGH_SORE_THROAT, "Ні"):
+        (COUGH_FLU,
          "Ви нещодавно хворіли на ГРВІ?"),
-    (CoughStates.COUGH_SORE_THROAT.value, "Так"):
-        (ConversationStates.DONE.value,
+    (COUGH_SORE_THROAT, "Так"):
+        (DONE,
          "Можливо, у вас ГРВІ. Вам показані "
          "постільний режим, вживання теплих напоїв, "
          "прийом протикашльових лікарських засобів. "
          "Для комплексного впливу на патологію кашлю прийміть "
          "комбінований фітоніринговий препарат. Якщо протягом доби "
          "вам не полегшає, необхідно звернутися до лікаря."),
-    (CoughStates.COUGH_FLU.value, "Так"):
-        (ConversationStates.DONE.value,
+    (COUGH_FLU, "Так"):
+        (DONE,
          "Можливо, кашель є проявом залишкових явищ респіраторного "
          "захворювання. Вам показані протикашльові лікарські засоби "
          "центральної або периферійної дії. У зв'язку з тим, "
          "що деякі з них належать до рецептурних, необхідно звернутися "
          "до лікаря. "),
-    (CoughStates.COUGH_FLU.value, "Ні"):
-        (CoughStates.COUGH_ITCH.value,
+    (COUGH_FLU, "Ні"):
+        (COUGH_ITCH,
          "Чи є у вас свербіж шкіри?"),
-    (CoughStates.COUGH_ITCH.value, "Так"):
-        (ConversationStates.DONE.value,
+    (COUGH_ITCH, "Так"):
+        (DONE,
          "Можливо, кашель є проявом алергічної реакції"),
-    (CoughStates.COUGH_ITCH.value, "Ні"):
-        (ConversationStates.DONE.value,
+    (COUGH_ITCH, "Ні"):
+        (DONE,
          "Сухий кашель, який зберігається тривалий час, "
          "може бути симптомом багатьох захворювань. "
          "Необхідно звернутися до лікаря"),
 }
 transitions_dict["Кашель"] = cough_dict
+
+
+DIARRHEA_SYMPTOMS, DIARRHEA_DIET, DIARRHEA_MILK, DIARRHEA_CHRONIC_DISEASES, \
+    DIARRHEA_STRESS, DIARRHEA_ANTIMICROBIAL_DRUGS,\
+    DIARRHEA_MEDICINES = range(17, 24)
+
+
+diarrhea_dict = {
+    (INIT, "Діарея"):
+        (DIARRHEA_SYMPTOMS,
+         "Який характер мають випорожнення (відмічається зміна кольору - "
+         "до чорного і консистенції 'рисового відвару'), мають місце "
+         "загрозливі симптоми:\n\n"
+         f"{red_circle_sign}діарея триває більше 48 годин,\n"
+         f"{red_circle_sign}діарея супроводжується підвищенням "
+         f"температури тіла,\n"
+         f"{red_circle_sign}виділяється багато слизу та/або "
+         f"присутня кров у калі,\n"
+         f"{red_circle_sign}часті болісні позиви і болісна дефекація,\n"
+         f"{red_circle_sign}діарея супроводжується нудотою і блюванням,\n"
+         f"{red_circle_sign}наявні ознаки загального зневоднення: сильна "
+         f"спрага, відчуття сухості в роті, зморщена шкіра, знаження ваги "
+         f"тіла, значне зменшення кількості сечі,\n"
+         f"{red_circle_sign}діарея у вагітних,\n"
+         f"{red_circle_sign}діарея у дітей віком до 1 року,\n"
+         f"{red_circle_sign}наявність діареї одночасно у декількох членів "
+         f"родини"
+         ),
+    (DIARRHEA_SYMPTOMS, "Так"):
+        (DONE,
+         "Для уточнення діагнозу і призначення лікування "
+         "необхідно звернутися до лікаря"),
+    (DIARRHEA_SYMPTOMS, "Ні"):
+        (DIARRHEA_DIET,
+         "Якого режиму харчування ви дотримуєтеся: чи має місце "
+         "переїдання, різка зміна режиму харчування, вживання "
+         "продуктів, що викликають посилення перистальтики?"),
+    (DIARRHEA_DIET, "Так"):
+        (DONE,
+         "Дотримання звичного раціону харчування. "
+         "Призначити ферментні препарати"),
+    (DIARRHEA_DIET, "Ні"):
+        (DIARRHEA_MILK,
+         "Чи пов'язане нездужання з вживанням "
+         "незбираного молока?"),
+    (DIARRHEA_MILK, "Так"):
+        (DONE,
+         "Можливо, діарея пов'язана з нестачею лактози, "
+         "необхідні консультація лікаря і виключення з раціону "
+         "незбираного молока"),
+    (DIARRHEA_MILK, "Ні"):
+        (DIARRHEA_CHRONIC_DISEASES,
+         "Чи має місце загострення хронічних хвороб шлунково-кишкового "
+         "тракту (гіпоацидний гастрит, панкреатит, коліт, холецистит "
+         "тощо?)"),
+    (DIARRHEA_CHRONIC_DISEASES, "Так"):
+        (DONE,
+         "Необхідно звернутися до лікаря для лікування основного "
+         "захворювання"),
+    (DIARRHEA_CHRONIC_DISEASES, "Ні"):
+        (DIARRHEA_STRESS,
+         "Чи пов'язане нездужання з переляком або стресом?"),
+    (DIARRHEA_STRESS, "Так"):
+        (DONE,
+         "Рекомендовані седативні препарати"),
+    (DIARRHEA_STRESS, "Ні"):
+        (DIARRHEA_ANTIMICROBIAL_DRUGS,
+         "Чи пов'язане нездужання з прийомом "
+         "антимікробних препаратів?"),
+    (DIARRHEA_ANTIMICROBIAL_DRUGS, "Так"):
+        (DONE,
+         "Для уточнення діагнозу і призначення лікування "
+         "необхідно звернутися до лікаря"),
+    (DIARRHEA_ANTIMICROBIAL_DRUGS, "Ні"):
+        (DIARRHEA_MEDICINES,
+         "Чи пов'язане нездужання з прийомом лікарських засобів - "
+         "непрямих антикоагулянтів, нестероїдних протизапальних "
+         "препаратів, антацидних засобів, що містять магній, серцевих "
+         "глікозидів, препаратів калію, антиаритмічних засобів "
+         "(хінідин, пропранолол), замінювачів цукру (ксилітол, "
+         "сорбітол)?"),
+    (DIARRHEA_MEDICINES, "Так"):
+        (DONE,
+         "Необхідно звернутися до лікаря для подальшої корекції "
+         "лікування"),
+    (DIARRHEA_MEDICINES, "Ні"):
+        (DONE,
+         "Необхідно звернутися до лікаря для подальшої корекції "
+         "лікування"),
+}
+transitions_dict["Діарея"] = diarrhea_dict

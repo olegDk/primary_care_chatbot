@@ -36,10 +36,6 @@ class TelegramBot:
         # Initialize dialogue system
         self.__dialogue_system = DialogueSystem()
 
-        # All possible conversation states which are known to chatbot client
-        self.__conversation_states = \
-            self.__dialogue_system.get_conversation_states
-
         # Change to comprehension from diseases list
         self.__reply_keyboard = [
             [disease] for disease in self.__dialogue_system.get_diseases_list
@@ -67,7 +63,7 @@ class TelegramBot:
             "Доброго дня! Що вас турбує?",
             reply_markup=self.__markup,
         )
-        self.__current_state = self.__conversation_states.INIT.value
+        self.__current_state = self.__dialogue_system.init
 
         return self.__current_state
 
@@ -81,7 +77,7 @@ class TelegramBot:
         reply = self.__dialogue_system.respond(disease=self.__selected_disease,
                                                message=(self.__current_state,
                                                         text))
-        self.__current_state = self.__conversation_states.QUESTIONING.value
+        self.__current_state = self.__dialogue_system.questioning
         self.__questioning_state = reply[0]
         update.message.reply_text(f"{emoji_doctor}Обрана проблема: "
                                   f"{text.lower()}"
@@ -103,7 +99,7 @@ class TelegramBot:
 
         self.__questioning_state = reply[0]
 
-        if self.__questioning_state == self.__conversation_states.DONE.value:
+        if self.__questioning_state == self.__dialogue_system.done:
             self.__current_state = self.__questioning_state
             update.message.reply_text(f"{emoji_doctor}{reply[1]}",
                                       reply_markup=self.__done_markup)
@@ -148,12 +144,12 @@ class TelegramBot:
         conv_handler = ConversationHandler(
             entry_points=[CommandHandler("start", self.start)],
             states={
-                self.__conversation_states.INIT.value: [
+                self.__dialogue_system.init: [
                     MessageHandler(
                         Filters.regex(diseases_regex), self.initialize_dialogue
                     ),
                 ],
-                self.__conversation_states.QUESTIONING.value: [
+                self.__dialogue_system.questioning: [
                     MessageHandler(
                         Filters.regex("^(Так|Ні)$"), self.regular_choice
                     ),
